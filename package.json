@@ -1,0 +1,14 @@
+{
+  "name": "meu-app-ia-pagamento",
+  "version": "1.0.0",
+  "description": "Meu aplicativo com Mercado Pago, OpenAI e AWS Textract",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "mercadopago": "^2.0.10",
+    "openai": "^4.0.0",
+    "@aws-sdk/client-textract": "^3.609.0"
+  }
+}
