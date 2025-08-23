@@ -22,7 +22,8 @@ export default async function handler(req, res) {
         const languageMap = {
             'en': 'English', 'es': 'Spanish', 'pt': 'Brazilian Portuguese',
             'zh': 'Mandarin Chinese', 'ja': 'Japanese', 'ko': 'Korean',
-            'it': 'Italian', 'de': 'German', 'fr': 'French', 'ru': 'Russian'
+            'it': 'Italian', 'de': 'German', 'fr': 'French', 'ru': 'Russian',
+            'pl': 'Polish', 'he': 'Hebrew' // Idiomas adicionados
         };
         
         const targetLanguage = languageMap[language] || languageMap['pt'];
