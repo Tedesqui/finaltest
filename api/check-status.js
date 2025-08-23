@@ -27,7 +27,7 @@ export default async function handler(request, response) {
 
     if (searchResult.results && searchResult.results.length > 0) {
       const latestPayment = searchResult.results[0];
-      
+     
       console.log(`Status do pagamento [${latestPayment.id}] para sessionId [${sessionId}]: ${latestPayment.status}`);
 
       if (latestPayment.status === 'approved') {
