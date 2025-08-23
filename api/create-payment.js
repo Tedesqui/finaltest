@@ -17,7 +17,8 @@ const productDetails = {
     "sv": { name: 'Veckovis Åtkomst - AI-korrekturläsare', description: '1 veckas åtkomst till AI-korrekturläsningsverktyget.' },
     "pl": { name: 'Dostęp Tygodniowy - Korektor AI', description: '1-tygodniowy dostęp do narzędzia korektora AI.' },
     "bn": { name: 'সাপ্তাহিক অ্যাক্সেস - এআই প্রুফরিডার', description: 'এআই প্রুফরিডার টুলে ১ সপ্তাহের অ্যাক্সেস।' },
-    "ar": { name: 'وصول أسبوعي - مدقق لغوي بالذكاء الاصطناعي', description: 'وصول لمدة أسبوع واحد إلى أداة المدقق اللغوي بالذكاء الاصطناعي.' }
+    "ar": { name: 'وصول أسبوعي - مدقق لغوي بالذكاء الاصطناعي', description: 'وصول لمدة أسبوع واحد إلى أداة المدقق اللغوي بالذكاء الاصطناعي.' },
+    "he": { name: 'גישה שבועית - בודק AI', description: 'גישה לשבוע לכלי בודק המבחנים עם AI.' }
 };
 
 export default async function handler(request, response) {
