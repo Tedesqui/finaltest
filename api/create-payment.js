@@ -44,7 +44,8 @@ export default async function handler(request, response) {
                     name: details.name,
                     description: details.description,
                 },
-                unit_amount: currency.toLowerCase() === 'brl' ? 100 : 300,
+                // *** ALTERAÇÃO APLICADA AQUI ***
+                unit_amount: currency.toLowerCase() === 'brl' ? 1490 : 299,
             },
             quantity: 1,
         };
