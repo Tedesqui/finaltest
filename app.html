@@ -67,7 +67,6 @@
         const dictionary = translations[langCode] || translations['en'];
 
         document.documentElement.lang = userLanguage;
-        // Define a direção do texto para idiomas da direita para a esquerda
         if (langCode === 'he' || langCode === 'ar') {
             document.body.dir = 'rtl';
         } else {
@@ -78,26 +77,61 @@
             if (dictionary[key]) { element.innerHTML = dictionary[key]; }
         });
 
-        // --- LÓGICA DA APLICAÇÃO ---
+        // --- INÍCIO DO NOVO SISTEMA ANTI-FRAUDE ---
+        
         (function checkAccess() {
             const tokenString = localStorage.getItem('accessToken');
-            if (!tokenString) { window.location.href = '/index.html'; return; }
-            const token = JSON.parse(tokenString);
-            if (Date.now() > token.expiry) {
+            if (!tokenString) {
+                window.location.href = '/index.html';
+                return;
+            }
+            try {
+                const token = JSON.parse(tokenString);
+                const now = Date.now();
+
+                // 1. Valida o formato do token e detecta fraude (relógio movido para trás).
+                if (!token.expiry || !token.lastCheck || now < token.lastCheck) {
+                    localStorage.removeItem('accessToken');
+                    window.location.href = '/index.html';
+                    return;
+                }
+                
+                // 2. Verifica se o acesso expirou normalmente.
+                if (now >= token.expiry) {
+                    localStorage.removeItem('accessToken');
+                    // Não usamos alert() para não bloquear a execução. O redirecionamento é suficiente.
+                    window.location.href = '/index.html';
+                    return;
+                }
+
+                // 3. Se o acesso for válido, atualiza o 'lastCheck' para a hora atual.
+                token.lastCheck = now;
+                localStorage.setItem('accessToken', JSON.stringify(token));
+            } catch (e) {
                 localStorage.removeItem('accessToken');
-                alert(dictionary.sessionExpiredAlert);
                 window.location.href = '/index.html';
             }
         })();
 
+        // --- FIM DO NOVO SISTEMA ANTI-FRAUDE ---
+
         const timerDisplay = document.getElementById('time-left');
-        const tokenData = JSON.parse(localStorage.getItem('accessToken'));
+        const tokenData = JSON.parse(localStorage.getItem('accessToken')); // Re-lê o token atualizado
         if (tokenData && timerDisplay) {
             const expiryTime = tokenData.expiry;
             const updateTimer = () => {
                 const timeLeft = expiryTime - Date.now();
-                if (timeLeft <= 0) { timerDisplay.textContent = 'Expirado'; clearInterval(timerInterval); window.location.reload(); return; }
-                timerDisplay.textContent = `${Math.floor(timeLeft / 1000)}s`;
+                if (timeLeft <= 0) {
+                    timerDisplay.textContent = 'Expirado';
+                    clearInterval(timerInterval);
+                    window.location.reload();
+                    return;
+                }
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                timerDisplay.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
             };
             const timerInterval = setInterval(updateTimer, 1000);
             updateTimer();
@@ -135,7 +169,7 @@
             } catch (err) { console.error("Erro no OCR:", err); outputPanel.innerHTML = `<div id="status-text">${dictionary.statusErrorOcr}${err.message}</div>`; addRetryButton(resetUI); }
         }
         function showConfirmationView(ocrText) {
-            outputPanel.innerHTML = `<div id="confirmation-view"><p>${dictionary.confirmPrompt}</p><textarea id="text-to-process">${ocrText}</textarea><div id="confirmation-controls"><button id="retryBtn" class="secondary">${dictionary.retryButton}</button><button id="sendBtn" class="confirm">${dictionary.getAnswerButton}</button></div></div>`;
+            outputPanel.innerHTML = `<div id="confirmation-view"><p>${dictionary.confirmPrompt}</p><textarea id="text-to-process" style="width: 95%; height: 100px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; padding: 10px; margin-top: 10px;">${ocrText}</textarea><div id="confirmation-controls" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;"><button id="retryBtn" class="secondary" style="background-color: #6c757d;">${dictionary.retryButton}</button><button id="sendBtn" class="confirm" style="background-color: #28a745;">${dictionary.getAnswerButton}</button></div></div>`;
             document.getElementById('retryBtn').addEventListener('click', resetUI);
             document.getElementById('sendBtn').addEventListener('click', sendForCorrection);
         }
@@ -147,7 +181,7 @@
                 const response = await fetch("/api/corrigir", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ texto: textToProcess, language: langCode }) });
                 if (!response.ok) { const err = await response.json(); throw new Error(err.error || `Erro API`); }
                 const data = await response.json();
-                outputPanel.innerHTML = `<h2>${dictionary.resultTitle}</h2><pre id="correction-result">${data.resultado}</pre>`;
+                outputPanel.innerHTML = `<h2>${dictionary.resultTitle}</h2><pre id="correction-result" style="white-space: pre-wrap; word-wrap: break-word;">${data.resultado}</pre>`;
             } catch (err) { console.error("Erro na requisição:", err); outputPanel.innerHTML = `<div id="status-text">${dictionary.statusErrorApi}${err.message}</div>`; } finally { addRetryButton(resetUI); }
         }
         function addRetryButton(action) { const btn = document.createElement('button'); btn.innerText = dictionary.retryButton; btn.style.marginTop = '15px'; btn.addEventListener('click', action); outputPanel.appendChild(btn); }
